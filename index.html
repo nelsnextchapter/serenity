@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serenity</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="ambient-bg">
+  <div class="grad-layer"></div><div class="night-layer"></div><div class="star-field" id="starField"></div>
+  <div class="pulse-orb" style="width:380px;height:380px;background:radial-gradient(circle,rgba(200,213,192,.25),transparent);top:-100px;right:-100px"></div>
+  <div class="pulse-orb" style="width:280px;height:280px;background:radial-gradient(circle,rgba(212,204,223,.25),transparent);bottom:-50px;left:-50px;animation-delay:4s"></div>
+</div>
+<div class="app">
+  <nav class="nav">
+    <div class="nav-logo">s<span>e</span>renity</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPage('home',false)">Home</button>
+      <button class="nav-tab" onclick="showPage('meditate',false)">Meditate</button>
+      <button class="nav-tab" onclick="showPage('breathe',false)">Breathe</button>
+      <button class="nav-tab" onclick="showPage('sounds',false)">Sounds</button>
+      <button class="nav-tab" onclick="showPage('mood',false)">Mood</button>
+      <button class="nav-tab" onclick="showPage('sleep',false)">Sleep</button>
+    </div>
+    <div class="nav-right">
+      <button class="nav-btn" onclick="openSettings()">⚙ Settings</button>
+      <button class="nav-btn" onclick="goSleep()">🌙 Sleep</button>
+    </div>
+  </nav>
+  <div class="content">
+    <!-- HOME -->
+    <div id="page-home" class="fade-in">
+      <div class="home-hero">
+        <p class="hero-greeting" id="timeGreet">✦ Good evening ✦</p>
+        <h1 class="hero-title">Your sanctuary<br>awaits, <em>love.</em></h1>
+        <p class="hero-affirmation" id="dailyAffirmation"></p>
+        <button class="btn-primary" onclick="showPage('meditate',false)">Begin Your Practice</button>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-card" onclick="openMeditation(MEDITATIONS[0])"><span class="quick-icon">🌅</span><p class="quick-label">Start Here</p><p class="quick-title">Morning Grounding</p></div>
+        <div class="quick-card" onclick="showPage('breathe',false)"><span class="quick-icon">🫧</span><p class="quick-label">Quick Relief</p><p class="quick-title">Calm Breathing</p></div>
+        <div class="quick-card" onclick="showPage('sounds',false)"><span class="quick-icon">🎵</span><p class="quick-label">Ambiance</p><p class="quick-title">Soundscape</p></div>
+        <div class="quick-card" onclick="goSleep()"><span class="quick-icon">🌙</span><p class="quick-label">Tonight</p><p class="quick-title">Sleep Ritual</p></div>
+        <div class="quick-card" onclick="showPage('mood',false)"><span class="quick-icon">🌸</span><p class="quick-label">Check In</p><p class="quick-title">How Are You?</p></div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start">
+        <div class="glass-card">
+          <p class="section-sub">Your streak</p>
+          <div class="streak-row" id="streakRow"></div>
+          <hr class="divider">
+          <p class="section-sub">Today's suggestion</p>
+          <div id="suggestionCard" style="cursor:pointer"></div>
+        </div>
+        <div class="glass-card">
+          <p class="section-sub">Mood today</p>
+          <div style="text-align:center;padding:.75rem 0">
+            <p style="font-size:2.2rem;margin-bottom:.4rem" id="homeMoodEmoji">✨</p>
+            <p id="homeMoodText" class="day-text-mid" style="font-family:'Cormorant Garamond',serif;font-size:.9rem">Not checked in yet</p>
+            <button class="btn-ghost" style="margin-top:.9rem;font-size:.73rem" onclick="showPage('mood',false)">Check in →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- MEDITATE -->
+    <div id="page-meditate" class="hidden fade-in">
+      <div style="margin-bottom:1.75rem"><p class="section-sub">Your library</p><h2 class="section-title">Guided Meditations</h2></div>
+      <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1.25rem" id="medFilters">
+        <button class="breath-type active" onclick="filterMed('all',this)">All</button>
+        <button class="breath-type" onclick="filterMed('anxiety',this)">Anxiety</button>
+        <button class="breath-type" onclick="filterMed('sleep',this)">Sleep</button>
+        <button class="breath-type" onclick="filterMed('morning',this)">Morning</button>
+        <button class="breath-type" onclick="filterMed('healing',this)">Healing</button>
+        <button class="breath-type" onclick="filterMed('focus',this)">Focus</button>
+        <button class="breath-type" onclick="filterMed('love',this)">Self-Love</button>
+        <button class="breath-type" onclick="filterMed('favorites',this)">💛 Favorites</button>
+      </div>
+      <div class="med-grid" id="medGrid"></div>
+    </div>
+    <!-- BREATHE -->
+    <div id="page-breathe" class="hidden fade-in">
+      <div style="margin-bottom:1.75rem"><p class="section-sub">Nervous system</p><h2 class="section-title">Breathwork</h2></div>
+      <div class="breath-select" id="breathTypes"></div>
+      <div class="breath-section">
+        <div class="orb-container">
+          <div class="orb-outer" style="width:200px;height:200px"></div>
+          <div class="orb-outer" style="width:222px;height:222px;opacity:.15;animation-delay:1s"></div>
+          <div class="orb-main" id="breathOrb"><span class="orb-text" id="orbText">Ready</span></div>
+        </div>
+        <div class="breath-phase" id="breathPhase">Choose a practice above</div>
+        <div class="breath-count" id="breathCount">—</div>
+        <p class="breath-inst" id="breathInst">Select a breathing technique to begin</p>
+        <button class="breath-start" id="breathBtn" onclick="toggleBreath()">Begin Practice</button>
+        <p class="day-text" style="margin-top:.9rem;font-size:.78rem" id="breathCycles"></p>
+      </div>
+    </div>
+    <!-- SOUNDS -->
+    <div id="page-sounds" class="hidden fade-in">
+      <div style="margin-bottom:1.75rem"><p class="section-sub">Ambient mixer</p><h2 class="section-title">Soundscapes</h2></div>
+      <div class="row" style="margin-bottom:1.25rem">
+        <button class="btn-primary" onclick="randomPreset()">✦ Random Preset</button>
+        <button class="btn-ghost" onclick="clearSounds()">Clear All</button>
+        <span class="day-text" style="font-size:.78rem" id="activeCount">0 sounds active</span>
+      </div>
+      <div class="sound-grid" id="soundGrid"></div>
+      <div class="glass-card" style="margin-top:1.25rem">
+        <p class="section-sub">Sleep timer</p>
+        <div class="row">
+          <span class="day-text-mid" style="font-size:.82rem">Fade out in:</span>
+          <button class="btn-ghost" onclick="setTimer(15)">15 min</button>
+          <button class="btn-ghost" onclick="setTimer(30)">30 min</button>
+          <button class="btn-ghost" onclick="setTimer(60)">1 hour</button>
+          <button class="btn-ghost" onclick="setTimer(0)">Off</button>
+          <span style="font-size:.82rem;color:var(--bronze)" id="timerDisplay"></span>
+        </div>
+      </div>
+    </div>
+    <!-- MOOD -->
+    <div id="page-mood" class="hidden fade-in">
+      <div style="margin-bottom:1.75rem"><p class="section-sub">Emotional wellness</p><h2 class="section-title">How Are You, Love?</h2></div>
+      <div class="glass-card" style="margin-bottom:.9rem">
+        <p class="day-text-mid" style="font-family:'Cormorant Garamond',serif;font-size:1rem;margin-bottom:.9rem">Choose what resonates right now:</p>
+        <div class="mood-row">
+          <button class="mood-btn" onclick="selectMood(this,'😌','Peaceful')">😌 Peaceful</button>
+          <button class="mood-btn" onclick="selectMood(this,'😰','Anxious')">😰 Anxious</button>
+          <button class="mood-btn" onclick="selectMood(this,'😔','Low')">😔 Low</button>
+          <button class="mood-btn" onclick="selectMood(this,'🤩','Inspired')">🤩 Inspired</button>
+          <button class="mood-btn" onclick="selectMood(this,'😴','Tired')">😴 Tired</button>
+          <button class="mood-btn" onclick="selectMood(this,'🥰','Grateful')">🥰 Grateful</button>
+          <button class="mood-btn" onclick="selectMood(this,'😤','Stressed')">😤 Stressed</button>
+          <button class="mood-btn" onclick="selectMood(this,'✨','Glowing')">✨ Glowing</button>
+          <button class="mood-btn" onclick="selectMood(this,'🌧️','Heavy')">🌧️ Heavy</button>
+          <button class="mood-btn" onclick="selectMood(this,'🌸','Calm')">🌸 Calm</button>
+        </div>
+        <p class="day-text" style="font-size:.75rem;margin-top:.6rem;text-align:center" id="moodSelectedLabel"></p>
+      </div>
+      <div class="glass-card" style="margin-bottom:.9rem">
+        <p class="day-text-mid" style="font-family:'Cormorant Garamond',serif;font-size:1rem;margin-bottom:.75rem">Write freely, no judgment here:</p>
+        <textarea class="journal-area" id="journalEntry" placeholder="What's on your heart today? This space is only yours..."></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.75rem;flex-wrap:wrap;gap:.5rem">
+          <p class="day-text" style="font-size:.75rem" id="editingLabel"></p>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn-ghost" id="cancelEditBtn" style="display:none" onclick="cancelEdit()">Cancel</button>
+            <button class="btn-primary" onclick="saveEntry()">Save Reflection</button>
+          </div>
+        </div>
+      </div>
+      <div class="affirmation-box" id="moodAffirmation" style="display:none">
+        <p class="day-text" style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">A gentle reminder</p>
+        <p class="affirmation-text" id="affirmationText"></p>
+      </div>
+      <div style="margin-top:1.5rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;flex-wrap:wrap;gap:.75rem">
+          <p class="section-sub" style="margin-bottom:0">Journal Entries</p>
+          <select class="std-sel" id="sortSelect" onchange="renderEntries()"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select>
+        </div>
+        <div class="filter-bar" id="moodFilterBar"></div>
+        <div class="filter-bar" id="monthFilterBar"></div>
+        <div id="entriesList"></div>
+        <div class="glass-card" style="margin-top:1rem"><p class="section-sub">This week</p><div class="streak-row" id="moodHistory"></div></div>
+      </div>
+    </div>
+    <!-- SLEEP -->
+    <div id="page-sleep" class="hidden fade-in">
+      <div style="margin-bottom:1.75rem"><p class="section-sub">Nighttime ritual</p><h2 class="section-title">Wind Down</h2></div>
+      <div class="sleep-section">
+        <div class="sleep-stars" id="sleepStars"></div>
+        <h2 class="sleep-title">✦ Sleep Sanctuary</h2>
+        <span class="sleep-sub-lbl">Let the night hold you</span>
+        <div class="sleep-grid">
+          <div class="sleep-card" onclick="openMeditation(getMed('Deep Sleep'))"><div class="sleep-card-icon">🌙</div><div class="sleep-card-name">Sleep Meditation</div></div>
+          <div class="sleep-card" onclick="openMeditation(getMed('Sleep Story'))"><div class="sleep-card-icon">⭐</div><div class="sleep-card-name">Sleep Story</div></div>
+          <div class="sleep-card" onclick="openMeditation({name:'Body Scan',emoji:'🌊',cat:'sleep',color:'linear-gradient(135deg,#1A2030,#0A1020)',dur:15,desc:'Release each part of your body'})"><div class="sleep-card-icon">🌊</div><div class="sleep-card-name">Body Scan</div></div>
+          <div class="sleep-card" onclick="showPage('breathe',true)"><div class="sleep-card-icon">🫧</div><div class="sleep-card-name">Sleep Breathing</div></div>
+          <div class="sleep-card" onclick="showPage('sounds',true)"><div class="sleep-card-icon">🎵</div><div class="sleep-card-name">Night Sounds</div></div>
+          <div class="sleep-card" onclick="openMeditation({name:'Gratitude Ritual',emoji:'📿',cat:'healing',color:'linear-gradient(135deg,#1E1228,#0A1520)',dur:10,desc:'Rest in what was good today'})"><div class="sleep-card-icon">📿</div><div class="sleep-card-name">Gratitude Ritual</div></div>
+        </div>
+        <div class="sleep-timer-area">
+          <span class="sleep-timer-sub">Sleep timer</span>
+          <div class="sleep-timer-disp" id="sleepTimer">—</div>
+          <div class="sleep-timer-btns">
+            <button class="timer-btn" onclick="setSleepTimer(20)">20 min</button>
+            <button class="timer-btn" onclick="setSleepTimer(45)">45 min</button>
+            <button class="timer-btn" onclick="setSleepTimer(90)">90 min</button>
+            <button class="timer-btn" onclick="setSleepTimer(0)">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="glass-card" style="margin-top:1rem">
+        <p class="section-sub">Morning alarm</p>
+        <div class="row">
+          <span class="day-text-mid" style="font-family:'Cormorant Garamond',serif">Wake gently at:</span>
+          <input type="time" id="alarmTime">
+          <select class="std-sel" id="alarmSound"><option>Soft Chimes</option><option>Ocean Waves</option><option>Birdsong</option><option>Singing Bowl</option><option>Soft Piano</option></select>
+          <button class="btn-primary" style="font-size:.78rem">Set Alarm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYER -->
+<div class="player-overlay hidden" id="playerOverlay" onclick="closePlayer(event)">
+  <div class="player-modal">
+    <div class="player-art" id="playerArt"><span id="playerEmoji" style="font-size:3.2rem">🌅</span></div>
+    <p id="playerCat" class="day-text" style="font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.2rem"></p>
+    <h3 class="player-title" id="playerTitle">Meditation</h3>
+    <div class="dur-row day-text">
+      <span>Duration:</span>
+      <input class="dur-edit" id="durEditInput" type="number" min="1" max="180" value="10">
+      <span>min</span>
+      <button class="dur-save-btn" onclick="savePlayerDur()">Save</button>
+      <span class="dur-saved" id="durSavedMsg">✓ Saved</span>
+    </div>
+    <p class="day-text" id="playerSubText" style="font-size:.78rem;margin-bottom:.5rem">Relax and breathe</p>
+    <div class="player-progress" onclick="seekTrack(event)"><div class="player-bar" id="playerBar" style="width:0%"></div></div>
+    <div class="player-times"><span id="playerCurrent" class="day-text">0:00</span><span id="playerTotal" class="day-text">10:00</span></div>
+    <div class="player-controls">
+      <button class="ctrl-btn day-text-mid" onclick="skipBack()">⏮</button>
+      <button class="ctrl-play" id="playBtn" onclick="togglePlay()">▶</button>
+      <button class="ctrl-btn day-text-mid" onclick="skipFwd()">⏭</button>
+    </div>
+    <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:1rem">
+      <button class="btn-ghost" style="font-size:.72rem;padding:.3rem 1rem" id="favBtn" onclick="toggleFav()">🤍 Favorite</button>
+      <button class="btn-ghost" style="font-size:.72rem;padding:.3rem 1rem" id="loopBtn" onclick="toggleLoop()">🔁 Loop</button>
+    </div>
+    <button class="close-btn day-text" onclick="closePlayer()">Close</button>
+  </div>
+</div>
+
+<!-- REMINDER -->
+<div class="reminder-banner hidden" id="reminderBanner">
+  <div class="reminder-dot"></div>
+  <span class="reminder-text" id="reminderText">Take a deep breath.</span>
+  <button class="reminder-close" onclick="dismissReminder()">✕</button>
+</div>
+
+<!-- SETTINGS -->
+<div class="settings-overlay hidden" id="settingsOverlay" onclick="closeSettingsClick(event)">
+  <div class="settings-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400">Settings</h2>
+      <button onclick="closeSettings()" style="background:none;border:none;cursor:pointer;font-size:1.2rem" class="day-text">✕</button>
+    </div>
+    <div class="settings-section">
+      <span class="settings-label">Upload Your Audio</span>
+      <p class="settings-note">
+        Upload audio files here. For each file you can:<br>
+        • <strong>Sound slot</strong> — assigns it to a tile on the Sounds tab (e.g. Rain, Ocean). It will play when you toggle that tile.<br>
+        • <strong>Meditation slot</strong> — links it to one of the built-in meditations. It will play when you open that meditation in the player.<br>
+        • Leave both blank to create a new custom card in the Meditation library.
+      </p>
+      <div class="upload-zone">
+        <input type="file" accept="audio/*" multiple onchange="handleUpload(event)">
+        <p class="upload-zone-text">✦ Drop audio files here</p>
+        <p class="upload-zone-sub">MP3 · WAV · M4A · OGG · stored locally in your browser</p>
+      </div>
+      <div id="uploadedList" style="margin-top:.9rem"></div>
+    </div>
+    <hr class="divider">
+    <div class="settings-section">
+      <span class="settings-label">Wellness Reminders</span>
+      <div class="remind-toggle">
+        <span>Gentle reminders enabled</span>
+        <label class="toggle-switch"><input type="checkbox" id="remindersOn" checked onchange="remindersEnabled=this.checked"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="settings-section">
+      <span class="settings-label">Appearance</span>
+      <div class="remind-toggle">
+        <span>Night mode (all tabs)</span>
+        <label class="toggle-switch"><input type="checkbox" id="nightToggle" onchange="setGlobalNight(this.checked)"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="settings-section">
+      <span class="settings-label">Developer Notes — Adding Content</span>
+      <p class="settings-note">
+        <strong>Add a new meditation:</strong> Open serenity.html in a text editor. Find the <code>MEDITATIONS</code> array near the top of the &lt;script&gt; tag. Add a new object with: name, emoji, cat (anxiety/sleep/morning/healing/focus/love), color (CSS gradient), dur (minutes), desc.<br><br>
+        <strong>Add a new sound tile:</strong> Find the <code>SOUNDS</code> array. Add: name, emoji, id (unique lowercase slug). Then upload an audio file above and assign it to your new slot.<br><br>
+        <strong>Assign audio to a built-in meditation:</strong> Upload the file above, then choose the meditation name from the "Meditation slot" dropdown and click Save.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
