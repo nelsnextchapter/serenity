@@ -15,16 +15,18 @@
 const MEDITATIONS=[
   {name:'Morning Grounding',emoji:'🌅',cat:'morning',color:'linear-gradient(135deg,#F5E6D0,#E8D4C0)',dur:10,desc:'Begin the day with gentle presence'},
   {name:'Anxiety Relief',emoji:'🌊',cat:'anxiety',color:'linear-gradient(135deg,#D0E8E8,#C0D8E8)',dur:12,desc:'Dissolve tension and return to calm'},
-  {name:'Deep Sleep',emoji:'🌙',cat:'sleep',color:'linear-gradient(135deg,#2A1A3A,#1A2A3A)',dur:25,desc:'Drift into peaceful slumber'},
+  {name:'Deep Sleep',emoji:'🌙',cat:'sleep',sleepTab:true,color:'linear-gradient(135deg,#2A1A3A,#1A2A3A)',dur:25,desc:'Drift into peaceful slumber'},
   {name:'Emotional Healing',emoji:'🌸',cat:'healing',color:'linear-gradient(135deg,#F0D8E0,#E8D0D8)',dur:18,desc:'Hold yourself with tenderness'},
   {name:'Focus Clarity',emoji:'🔮',cat:'focus',color:'linear-gradient(135deg,#D8D0F0,#D0D8E8)',dur:8,desc:'Clear the mental fog gently'},
   {name:'Self-Love',emoji:'💛',cat:'love',color:'linear-gradient(135deg,#F5F0D0,#F0E8C8)',dur:15,desc:'Cultivate deep inner kindness'},
   {name:'Stress Reset',emoji:'🍃',cat:'anxiety',color:'linear-gradient(135deg,#D0E8D0,#C8E0C8)',dur:10,desc:'Release what you cannot control'},
   {name:'Nervous System Reset',emoji:'⚡',cat:'anxiety',color:'linear-gradient(135deg,#E8E0D0,#E0D8C8)',dur:20,desc:'Regulate and restore your body'},
   {name:'Confidence',emoji:'✨',cat:'love',color:'linear-gradient(135deg,#F5E8D0,#EDD0B8)',dur:12,desc:'Step into your fullest self'},
-  {name:'Sleep Story',emoji:'⭐',cat:'sleep',color:'linear-gradient(135deg,#1A2030,#0A1020)',dur:30,desc:'A calming narrative into rest'},
+  {name:'Sleep Story',emoji:'⭐',cat:'sleep',sleepTab:true,color:'linear-gradient(135deg,#1A2030,#0A1020)',dur:30,desc:'A calming narrative into rest'},
   {name:'Mindful Breathing',emoji:'🫧',cat:'focus',color:'linear-gradient(135deg,#D8EEF5,#C8E4F0)',dur:5,desc:'Anchor to the present moment'},
   {name:'Burnout Recovery',emoji:'🕯️',cat:'healing',color:'linear-gradient(135deg,#F0E8D8,#E8DDD0)',dur:22,desc:'Restore what exhaustion depleted'},
+  {name:'Body Scan',emoji:'🌊',cat:'sleep',sleepTab:true,color:'linear-gradient(135deg,#1A2030,#0A1020)',dur:15,desc:'Release each part of your body'},
+  {name:'Gratitude Ritual',emoji:'📿',cat:'healing',sleepTab:true,color:'linear-gradient(135deg,#1E1228,#0A1520)',dur:10,desc:'Rest in what was good today'},
 ];
 
 /* ═══════════════════════════════════════════════════════
@@ -356,13 +358,13 @@ function fireAlarm(){
       const a=new Audio(track.url);a.volume=0.8;
       a.play().catch(()=>{});
       alarmAC=a;
-      document.getElementById('alarmStatus').textContent='⏰ Alarm ringing — '+soundName+' · Click Stop to dismiss';
+      document.getElementById('alarmStatus').textContent='⏰ Alarm ringing — '+soundName+' · Click Cancel to dismiss';
       return;
     }
   }
   // Fallback: synthesized tones
   playAlarmTones(ALARM_SOUND_FREQS[soundName]||[523,659,784]);
-  document.getElementById('alarmStatus').textContent='⏰ Alarm ringing — '+soundName+' (synthesized) · Click Stop to dismiss';
+  document.getElementById('alarmStatus').textContent='⏰ Alarm ringing — '+soundName+' (synthesized) · Click Cancel to dismiss';
 }
 
 function playAlarmTones(freqs){
@@ -392,8 +394,78 @@ function stopAlarmAudio(){
   document.getElementById('alarmStatus').textContent='';
 }
 
+
+/* ─────────────────────────────────────────────────────────────
+   buildSleepGrid — auto-generates Sleep tab cards from MEDITATIONS.
+   Any entry with sleepTab:true appears here.
+   To add a new sleep meditation to the Sleep tab:
+     1. Add it to the MEDITATIONS array in script.js
+     2. Set sleepTab:true in that entry
+   The two fixed link cards (Sleep Breathing, Night Sounds) are
+   always appended at the end.
+───────────────────────────────────────────────────────────── */
+
+function filterSleepGrid(filter,btn){
+  document.querySelectorAll('.sleep-filter-btn').forEach(b=>{
+    b.style.background='rgba(237,232,248,0.08)';
+    b.style.borderColor='rgba(237,232,248,0.22)';
+    b.style.color='var(--nt2)';
+  });
+  btn.style.background='rgba(237,232,248,0.22)';
+  btn.style.borderColor='rgba(237,232,248,0.55)';
+  btn.style.color='var(--nt)';
+  const grid=document.getElementById('sleepGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+  const sleepMeds=MEDITATIONS.filter(m=>m.sleepTab);
+  const shown=filter==='favorites'?sleepMeds.filter(m=>favorites.has(m.name)):sleepMeds;
+  shown.forEach(m=>{
+    const d=document.createElement('div');d.className='sleep-card';
+    d.innerHTML=`<div class="sleep-card-icon">${m.emoji}${favorites.has(m.name)?'<span style="font-size:.7rem;position:absolute;top:.2rem;right:.2rem">💛</span>':''}</div><div class="sleep-card-name">${m.name}</div>`;
+    d.style.position='relative';
+    d.onclick=()=>openMeditation(m);
+    grid.appendChild(d);
+  });
+  if(filter==='favorites'&&shown.length===0){
+    const e=document.createElement('div');
+    e.style.cssText='grid-column:1/-1;text-align:center;padding:1rem;font-size:.85rem;color:var(--nt2);font-family:'Cormorant Garamond',serif;font-style:italic';
+    e.textContent='No favorites yet — open a sleep meditation and tap 💛 Favorite';
+    grid.appendChild(e);
+  }
+  if(filter==='all'){
+    const links=[{icon:'🫧',name:'Sleep Breathing',fn:()=>showPage('breathe',true)},{icon:'🎵',name:'Night Sounds',fn:()=>showPage('sounds',true)}];
+    links.forEach(l=>{const d=document.createElement('div');d.className='sleep-card';d.innerHTML=`<div class="sleep-card-icon">${l.icon}</div><div class="sleep-card-name">${l.name}</div>`;d.onclick=l.fn;grid.appendChild(d);});
+  }
+}
+
+function buildSleepGrid(){
+  const grid=document.getElementById('sleepGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+  // Meditation cards — any entry with sleepTab:true
+  MEDITATIONS.filter(m=>m.sleepTab).forEach(m=>{
+    const d=document.createElement('div');
+    d.className='sleep-card';
+    d.innerHTML=`<div class="sleep-card-icon">${m.emoji}</div><div class="sleep-card-name">${m.name}</div>`;
+    d.onclick=()=>openMeditation(m);
+    grid.appendChild(d);
+  });
+  // Fixed link cards — always present
+  const links=[
+    {icon:'🫧',name:'Sleep Breathing',fn:()=>showPage('breathe',true)},
+    {icon:'🎵',name:'Night Sounds',   fn:()=>showPage('sounds',true)},
+  ];
+  links.forEach(l=>{
+    const d=document.createElement('div');
+    d.className='sleep-card';
+    d.innerHTML=`<div class="sleep-card-icon">${l.icon}</div><div class="sleep-card-name">${l.name}</div>`;
+    d.onclick=l.fn;
+    grid.appendChild(d);
+  });
+}
+
 function init(){
-  buildMedGrid();buildBreathTypes();buildSoundGrid();buildSleepStars();buildStarField();buildParticles();buildStreaks();updateGreet();
+  buildMedGrid();buildBreathTypes();buildSoundGrid();buildSleepGrid();buildSleepStars();buildStarField();buildParticles();buildStreaks();updateGreet();
   document.getElementById('dailyAffirmation').textContent=`"${getDailyAffirmation()}"`;
   buildSuggestionCard();
   try{const m=JSON.parse(localStorage.getItem('serenity_mood'));if(m){document.getElementById('homeMoodEmoji').textContent=m.emoji;document.getElementById('homeMoodText').textContent=m.label;}}catch(e){}
