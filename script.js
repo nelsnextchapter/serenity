@@ -48,6 +48,29 @@ const SOUNDS=[
   {name:'Singing Bowls',emoji:'🪬',id:'bowls'},{name:'Wind Chimes',emoji:'🎐',id:'chimes'},
   {name:'Soft Piano',emoji:'🎹',id:'piano'},{name:'Pink Noise',emoji:'🌸',id:'pink'},
   {name:'Brown Noise',emoji:'🤎',id:'brown'},{name:'Wind',emoji:'💨',id:'wind'},
+  /* ── Solfeggio & Healing Frequencies ── */
+  {name:'174 Hz Grounding',emoji:'🔔',id:'hz174'},
+  {name:'285 Hz Healing',emoji:'💚',id:'hz285'},
+  {name:'396 Hz Release',emoji:'🌀',id:'hz396'},
+  {name:'417 Hz Change',emoji:'🔄',id:'hz417'},
+  {name:'528 Hz Transform',emoji:'✨',id:'hz528'},
+  {name:'639 Hz Heart',emoji:'💛',id:'hz639'},
+  {name:'741 Hz Intuition',emoji:'🔮',id:'hz741'},
+  {name:'852 Hz Spiritual',emoji:'🌟',id:'hz852'},
+  {name:'963 Hz Divine',emoji:'☀️',id:'hz963'},
+  {name:'432 Hz Universal',emoji:'🎵',id:'hz432'},
+  {name:'136 Hz Om',emoji:'🕉️',id:'hz136'},
+  {name:'40 Hz Gamma',emoji:'⚡',id:'hz40'},
+  {name:'Delta 2Hz Sleep',emoji:'😴',id:'bin_delta'},
+  {name:'Theta 6Hz Meditate',emoji:'🧘',id:'bin_theta'},
+  {name:'Alpha 10Hz Relax',emoji:'🫧',id:'bin_alpha'},
+  {name:'Beta 18Hz Focus',emoji:'🎯',id:'bin_beta'},
+  {name:'Gamma 40Hz Cognition',emoji:'🧠',id:'bin_gamma'},
+  {name:'Schumann 7.83Hz',emoji:'🌍',id:'bin_schumann'},
+  {name:'Tibetan Bowl 528',emoji:'🪘',id:'bowl528'},
+  {name:'Soft Drone',emoji:'🎶',id:'drone_soft'},
+  {name:'Sub Bass Drone',emoji:'🔉',id:'drone_sub'},
+  {name:'Celestial Pad',emoji:'🌌',id:'pad_celestial'},
 ];
 
 /* Mood → recommended category */
@@ -217,7 +240,35 @@ function runBreathStep(){if(!breathRunning)return;const dur=selectedBreath.patte
 function animateOrb(scale,color,dur){const o=document.getElementById('breathOrb');o.style.transition=`transform ${dur||.5}s ease-in-out,background ${dur||.5}s ease-in-out,box-shadow ${dur||.5}s ease-in-out`;o.style.transform=`scale(${scale})`;if(color){o.style.background=`radial-gradient(circle,${color},rgba(212,204,223,.5))`;o.style.boxShadow=scale>1.2?`0 0 60px ${color.replace('.9','.5')},0 0 120px ${color.replace('.9','.15')}`:`0 0 20px ${color.replace('.9','.25')}`;}}
 
 /* SOUNDS */
-function buildSoundGrid(){const grid=document.getElementById('soundGrid');SOUNDS.forEach(s=>{const d=document.createElement('div');d.className='sound-tile';d.id='sound-'+s.id;d.innerHTML=`<span class="sound-icon">${s.emoji}</span><p class="sound-name">${s.name}</p><div class="sound-controls"><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="updateVol('${s.id}',this.value)"><button class="sound-restart" title="Restart from beginning" onclick="restartSound(event,'${s.id}')">↺</button></div>`;d.onclick=e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON')return;toggleSound(s.id,d);};grid.appendChild(d);});}
+function buildSoundGrid(){
+  const grid=document.getElementById('soundGrid');
+  // Group sounds into sections for visual clarity
+  const sections=[
+    {label:'Nature & Ambient',ids:['rain','thunder','fire','ocean','river','forest','birds','cafe','crickets','wind','piano']},
+    {label:'Noise & Tones',ids:['white','pink','brown','bowls','chimes','bowl528','drone_soft','drone_sub','pad_celestial']},
+    {label:'Solfeggio Frequencies',ids:['hz174','hz285','hz396','hz417','hz528','hz639','hz741','hz852','hz963','hz432','hz136','hz40']},
+    {label:'Binaural Beats',ids:['bin_delta','bin_theta','bin_alpha','bin_beta','bin_gamma','bin_schumann']},
+  ];
+  // Build a lookup map
+  const soundMap={};SOUNDS.forEach(s=>soundMap[s.id]=s);
+  sections.forEach(sec=>{
+    // Section header
+    const hdr=document.createElement('div');
+    hdr.style.cssText='grid-column:1/-1;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-light);padding:.5rem 0 .25rem;border-top:1px solid rgba(184,154,122,.12);margin-top:.25rem;transition:color .8s';
+    hdr.className='sound-section-hdr';
+    hdr.textContent=sec.label;
+    grid.appendChild(hdr);
+    // Tiles for this section
+    sec.ids.forEach(id=>{
+      const s=soundMap[id];
+      if(!s)return;
+      const d=document.createElement('div');d.className='sound-tile';d.id='sound-'+s.id;
+      d.innerHTML=`<span class="sound-icon">${s.emoji}</span><p class="sound-name">${s.name}</p><div class="sound-controls"><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="updateVol('${s.id}',this.value)"><button class="sound-restart" title="Restart from beginning" onclick="restartSound(event,'${s.id}')">↺</button></div>`;
+      d.onclick=e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON')return;toggleSound(s.id,d);};
+      grid.appendChild(d);
+    });
+  });
+}
 function toggleSound(id,el){if(activeSounds[id]){delete activeSounds[id];el.classList.remove('active');el.querySelector('.sound-vol').style.display='none';if(audioElements[id])audioElements[id].pause();}else{activeSounds[id]=50;el.classList.add('active');el.querySelector('.sound-vol').style.display='block';const track=uploadedTracks.find(t=>t.soundSlot===id);if(track&&track.url){if(!audioElements[id]){audioElements[id]=new Audio(track.url);audioElements[id].loop=true;}audioElements[id].volume=0.5;audioElements[id].play().catch(()=>{});}}document.getElementById('activeCount').textContent=`${Object.keys(activeSounds).length} sounds active`;}
 function restartSound(e,id){
   e.stopPropagation();
