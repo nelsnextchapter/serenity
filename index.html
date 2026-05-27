@@ -194,8 +194,10 @@
           <span class="day-text-mid" style="font-family:'Cormorant Garamond',serif">Wake gently at:</span>
           <input type="time" id="alarmTime">
           <select class="std-sel" id="alarmSound"><option>Soft Chimes</option><option>Ocean Waves</option><option>Birdsong</option><option>Singing Bowl</option><option>Soft Piano</option></select>
-          <button class="btn-primary" style="font-size:.78rem">Set Alarm</button>
+          <button class="btn-primary" style="font-size:.78rem" onclick="scheduleAlarm()">Set Alarm</button>
+          <button class="btn-ghost" style="font-size:.78rem" onclick="clearAlarm()">Cancel</button>
         </div>
+        <p id="alarmStatus" style="font-size:.75rem;color:var(--text-light);margin-top:.5rem;transition:color .8s" class="day-text"></p>
       </div>
     </div>
   </div>
@@ -213,6 +215,11 @@
       <span>min</span>
       <button class="dur-save-btn" onclick="savePlayerDur()">Save</button>
       <span class="dur-saved" id="durSavedMsg">✓ Saved</span>
+    </div>
+    <div class="vol-row">
+      <span class="vol-label day-text">🔈</span>
+      <input class="vol-slider" id="playerVolSlider" type="range" min="0" max="100" value="80" step="1" oninput="setPlayerVolume(this.value)">
+      <span class="vol-pct day-text" id="playerVolPct">80%</span>
     </div>
     <p class="day-text" id="playerSubText" style="font-size:.78rem;margin-bottom:.5rem">Relax and breathe</p>
     <div class="player-progress" onclick="seekTrack(event)"><div class="player-bar" id="playerBar" style="width:0%"></div></div>
