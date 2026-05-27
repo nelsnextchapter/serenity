@@ -428,7 +428,7 @@ function filterSleepGrid(filter,btn){
   });
   if(filter==='favorites'&&shown.length===0){
     const e=document.createElement('div');
-    e.style.cssText='grid-column:1/-1;text-align:center;padding:1rem;font-size:.85rem;color:var(--nt2);font-family:'Cormorant Garamond',serif;font-style:italic';
+    e.style.cssText="grid-column:1/-1;text-align:center;padding:1rem;font-size:.85rem;color:var(--nt2);font-family:'Cormorant Garamond',serif;font-style:italic";
     e.textContent='No favorites yet — open a sleep meditation and tap 💛 Favorite';
     grid.appendChild(e);
   }
