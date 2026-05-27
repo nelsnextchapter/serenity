@@ -52,7 +52,7 @@ const SOUNDS=[
 const MOOD_TO_CAT={Peaceful:'healing',Anxious:'anxiety',Low:'healing',Inspired:'love',Tired:'sleep',Grateful:'love',Stressed:'anxiety',Glowing:'morning',Heavy:'healing',Calm:'focus'};
 function timeOfDayCat(){const h=new Date().getHours();if(h>=5&&h<10)return'morning';if(h>=10&&h<14)return'focus';if(h>=14&&h<18)return'anxiety';if(h>=18&&h<21)return'healing';return'sleep';}
 function getDailySuggestion(){const savedMood=localStorage.getItem('serenity_mood');let cat=timeOfDayCat(),reason='Based on your time of day';if(savedMood){try{const m=JSON.parse(savedMood);if(m.label&&MOOD_TO_CAT[m.label]){cat=MOOD_TO_CAT[m.label];reason=`Based on your mood: ${m.emoji} ${m.label}`;}}catch(e){}}const pool=MEDITATIONS.filter(m=>m.cat===cat);if(!pool.length)return{med:MEDITATIONS[0],reason:'Good place to start'};const med=pool[Math.floor(Date.now()/86400000)%pool.length];return{med,reason};}
-const AFFIRMATIONS=["You are exactly where you need to be right now.","Your rest is sacred. Your peace is deserved.","You are allowed to take up space, to breathe, to be.","Softness is not weakness — it is your greatest strength.","You are worthy of gentleness, especially your own.","Every exhale releases what no longer serves you.","Your nervous system knows how to find its way home.","You are held, you are safe, you are enough.","Let the quiet fill all the spaces that noise has left.","Today, you gave what you could. That is beautiful.","You do not have to earn your rest.","In stillness, you remember who you truly are."];
+const AFFIRMATIONS=["You are exactly where you need to be right now.","Your rest is sacred. Your peace is deserved.","You are allowed to take up space, to breathe, to be.","Softness is not weakness — it is your greatest strength.","You are worthy of gentleness, especially your own.","Every exhale releases what no longer serves you.","Your nervous system knows how to find its way home.","You are held, you are safe, you are enough.","Let the quiet fill all the spaces that noise has left.","Today, you gave what you could. That is beautiful.","You do not have to earn your rest.","In stillness, you remember who you truly are.","Peace is not something you chase — it is something you return to.","Your feelings are messengers, not monsters.","You are allowed to change your mind, your pace, your needs.","Being gentle with yourself is an act of courage.","You don’t need to be more productive. You need to breathe.","Rest is not laziness. It is how you remember yourself.","The way you talk to yourself matters. Choose tenderness.","You are more than what you produce or accomplish.","Healing is not linear, and that is okay.","Your body holds wisdom. Listen to it.","You are worthy of the love you give so freely to others.","Slow down. The world can wait while you breathe.","You are doing better than you know.","Every soft morning is a new invitation.","You deserve the same grace you offer everyone else.","Stillness is not empty — it is full of you.","Even in uncertainty, you are grounded.","Today is enough. You are enough."];
 const REMINDERS=["Take a deep breath, slowly.","Relax your shoulders, soften your jaw.","Drink some water, sweet soul.","Unclench your hands. Let them rest.","You are safe in this moment.","Step away from the screen for a breath.","Stretch your neck gently. You carry so much.","Rest is productive. Rest is enough.","Dim the lights and slow down.","You don't have to rush."];
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const BREATH_TYPES=[
@@ -68,7 +68,7 @@ const BREATH_TYPES=[
 let globalNight=false,remindersEnabled=true;
 let breathRunning=false,breathCycle=0,breathStep=0,breathTimer=null,selectedBreath=BREATH_TYPES[0];
 let activeSounds={},soundTimerIv=null,sleepTimerIv=null,audioElements={};
-let playerAudio=null;
+let playerAudio=null,playerVolume=0.8;
 let playerState={playing:false,progress:0,duration:600,track:null,loop:false,usingRealAudio:false};
 let playerIv=null;
 let editingEntryId=null,selectedMoodData=null,filterMoodVal='all',filterMonthVal='all';
@@ -138,7 +138,10 @@ function openMeditation(m){
   else if(m.url)audioUrl=m.url;
   if(audioUrl){
     playerAudio=new Audio(audioUrl);
-    playerAudio.loop=playerState.loop;
+    playerAudio.loop=playerState.loop;playerAudio.volume=playerVolume;
+    const pv=Math.round(playerVolume*100);
+    document.getElementById('playerVolSlider').value=pv;
+    document.getElementById('playerVolPct').textContent=pv+'%';
     playerAudio.addEventListener('loadedmetadata',()=>{
       const rd=Math.ceil(playerAudio.duration)||playerState.duration;
       playerState.duration=rd;
@@ -161,6 +164,11 @@ function openMeditation(m){
     document.getElementById('playerSubText').textContent='Relax and breathe';
   }
   document.getElementById('playerOverlay').classList.remove('hidden');
+}
+function setPlayerVolume(val){
+  playerVolume=parseInt(val)/100;
+  document.getElementById('playerVolPct').textContent=val+'%';
+  if(playerAudio)playerAudio.volume=playerVolume;
 }
 function stopPlayerAudio(){if(playerAudio){playerAudio.pause();playerAudio.currentTime=0;playerAudio=null;}clearInterval(playerIv);}
 function togglePlay(){
@@ -207,8 +215,12 @@ function runBreathStep(){if(!breathRunning)return;const dur=selectedBreath.patte
 function animateOrb(scale,color,dur){const o=document.getElementById('breathOrb');o.style.transition=`transform ${dur||.5}s ease-in-out,background ${dur||.5}s ease-in-out,box-shadow ${dur||.5}s ease-in-out`;o.style.transform=`scale(${scale})`;if(color){o.style.background=`radial-gradient(circle,${color},rgba(212,204,223,.5))`;o.style.boxShadow=scale>1.2?`0 0 60px ${color.replace('.9','.5')},0 0 120px ${color.replace('.9','.15')}`:`0 0 20px ${color.replace('.9','.25')}`;}}
 
 /* SOUNDS */
-function buildSoundGrid(){const grid=document.getElementById('soundGrid');SOUNDS.forEach(s=>{const d=document.createElement('div');d.className='sound-tile';d.id='sound-'+s.id;d.innerHTML=`<span class="sound-icon">${s.emoji}</span><p class="sound-name">${s.name}</p><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="updateVol('${s.id}',this.value)" style="display:none">`;d.onclick=e=>{if(e.target.type!=='range')toggleSound(s.id,d);};grid.appendChild(d);});}
+function buildSoundGrid(){const grid=document.getElementById('soundGrid');SOUNDS.forEach(s=>{const d=document.createElement('div');d.className='sound-tile';d.id='sound-'+s.id;d.innerHTML=`<span class="sound-icon">${s.emoji}</span><p class="sound-name">${s.name}</p><div class="sound-controls"><input type="range" class="sound-vol" min="0" max="100" value="50" oninput="updateVol('${s.id}',this.value)"><button class="sound-restart" title="Restart from beginning" onclick="restartSound(event,'${s.id}')">↺</button></div>`;d.onclick=e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON')return;toggleSound(s.id,d);};grid.appendChild(d);});}
 function toggleSound(id,el){if(activeSounds[id]){delete activeSounds[id];el.classList.remove('active');el.querySelector('.sound-vol').style.display='none';if(audioElements[id])audioElements[id].pause();}else{activeSounds[id]=50;el.classList.add('active');el.querySelector('.sound-vol').style.display='block';const track=uploadedTracks.find(t=>t.soundSlot===id);if(track&&track.url){if(!audioElements[id]){audioElements[id]=new Audio(track.url);audioElements[id].loop=true;}audioElements[id].volume=0.5;audioElements[id].play().catch(()=>{});}}document.getElementById('activeCount').textContent=`${Object.keys(activeSounds).length} sounds active`;}
+function restartSound(e,id){
+  e.stopPropagation();
+  if(audioElements[id]){audioElements[id].currentTime=0;if(activeSounds[id])audioElements[id].play().catch(()=>{});}
+}
 function updateVol(id,v){activeSounds[id]=parseInt(v);if(audioElements[id])audioElements[id].volume=parseInt(v)/100;}
 function clearSounds(){activeSounds={};Object.values(audioElements).forEach(a=>a.pause());document.querySelectorAll('.sound-tile').forEach(t=>{t.classList.remove('active');t.querySelector('.sound-vol').style.display='none';});document.getElementById('activeCount').textContent='0 sounds active';}
 function randomPreset(){clearSounds();const p=[[0,2,3],[1,2,8],[4,5,6],[9,11,12],[3,8,11],[0,4,7]];p[Math.floor(Math.random()*p.length)].forEach(i=>{const s=SOUNDS[i];const el=document.getElementById('sound-'+s.id);if(el)toggleSound(s.id,el);});}
@@ -272,7 +284,8 @@ function renderUploadedList(){
   list.innerHTML='';
   uploadedTracks.forEach(t=>{
     const soundOpts=SOUNDS.map(s=>`<option value="${s.id}"${t.soundSlot===s.id?' selected':''}>${s.emoji} ${s.name}</option>`).join('');
-    const medOpts=MEDITATIONS.map(m=>`<option value="${m.name}"${t.medSlot===m.name?' selected':''}>${m.emoji} ${m.name}</option>`).join('');
+    const alarmSlotOpts=['Soft Chimes','Ocean Waves','Birdsong','Singing Bowl','Soft Piano'].map(a=>`<option value="alarm:${a}"${t.medSlot==='alarm:'+a?' selected':''}>⏰ Alarm: ${a}</option>`).join('');
+    const medOpts=MEDITATIONS.map(m=>`<option value="${m.name}"${t.medSlot===m.name?' selected':''}>${m.emoji} ${m.name}</option>`).join('')+alarmSlotOpts;
     const row=document.createElement('div');row.className='uploaded-track';
     row.innerHTML=`<span style="flex:1;min-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem" title="${t.name}">${t.name}</span>
     <select class="track-cat-sel" title="Sound tile" onchange="assignSoundSlot('${t.id}',this.value)"><option value="">🔇 Sound…</option>${soundOpts}</select>
@@ -297,6 +310,88 @@ function buildParticles(){const bg=document.querySelector('.ambient-bg');for(let
 /* INIT */
 function getDailyAffirmation(){const dayIndex=Math.floor(Date.now()/86400000);const hourShift=Math.floor(new Date().getHours()/6);return AFFIRMATIONS[(dayIndex+hourShift)%AFFIRMATIONS.length];}
 function buildSuggestionCard(){const{med,reason}=getDailySuggestion();const card=document.getElementById('suggestionCard');card.innerHTML=`<span style="font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--bronze);margin-bottom:.3rem;display:block;opacity:.8">${reason}</span><div style="display:flex;gap:1rem;padding:.75rem 0;align-items:center"><div style="font-size:2rem;flex-shrink:0">${med.emoji}</div><div><p class="med-cat">${med.cat}</p><p class="med-name" style="font-size:1.05rem">${med.name} · ${med.dur} min</p><p class="med-dur" style="margin-top:.2rem">${med.desc}</p></div></div>`;card.onclick=()=>openMeditation(med);}
+
+/* ── ALARM SOUNDS ──
+   ALARM_SOUNDS maps each select option to a tone generator.
+   To add a real audio file for "Soft Chimes" or any other option,
+   upload it in Settings and assign to the matching alarm slot.
+   Keys must match the <option> text values in the alarm select. */
+const ALARM_SOUND_FREQS={
+  'Soft Chimes':[523,659,784,1047],
+  'Ocean Waves':[220,277,330],
+  'Birdsong':[880,1100,1320,1760],
+  'Singing Bowl':[432,432.7],
+  'Soft Piano':[261,329,392,523],
+};
+let alarmTimeout=null,alarmAC=null;
+/* medAudioMap reused for alarm slots — alarm slot keys: 'alarm:Soft Chimes' etc. */
+
+function scheduleAlarm(){
+  clearAlarm();
+  const timeInput=document.getElementById('alarmTime').value;
+  if(!timeInput)return;
+  const [hh,mm]=timeInput.split(':').map(Number);
+  const now=new Date();
+  const alarm=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hh,mm,0,0);
+  if(alarm<=now)alarm.setDate(alarm.getDate()+1); // next day if already passed
+  const ms=alarm-now;
+  const label=timeInput+' with '+document.getElementById('alarmSound').value;
+  document.getElementById('alarmStatus').textContent='Alarm set for '+alarm.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' — '+document.getElementById('alarmSound').value;
+  alarmTimeout=setTimeout(()=>fireAlarm(),ms);
+}
+
+function clearAlarm(){
+  if(alarmTimeout){clearTimeout(alarmTimeout);alarmTimeout=null;}
+  stopAlarmAudio();
+}
+
+function fireAlarm(){
+  const soundName=document.getElementById('alarmSound').value;
+  const alarmKey='alarm:'+soundName;
+  // Check if user uploaded audio for this alarm sound
+  const uploadedId=medAudioMap[alarmKey];
+  if(uploadedId){
+    const track=uploadedTracks.find(t=>t.id===uploadedId);
+    if(track&&track.url){
+      const a=new Audio(track.url);a.volume=0.8;
+      a.play().catch(()=>{});
+      alarmAC=a;
+      document.getElementById('alarmStatus').textContent='⏰ Alarm ringing — '+soundName+' · Click Stop to dismiss';
+      return;
+    }
+  }
+  // Fallback: synthesized tones
+  playAlarmTones(ALARM_SOUND_FREQS[soundName]||[523,659,784]);
+  document.getElementById('alarmStatus').textContent='⏰ Alarm ringing — '+soundName+' (synthesized) · Click Stop to dismiss';
+}
+
+function playAlarmTones(freqs){
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  alarmAC=ctx;
+  let t=ctx.currentTime;
+  for(let rep=0;rep<6;rep++){
+    freqs.forEach((f,i)=>{
+      const o=ctx.createOscillator();const g=ctx.createGain();
+      o.frequency.value=f;o.type='sine';
+      g.gain.setValueAtTime(0,t+i*0.18);
+      g.gain.linearRampToValueAtTime(0.4,t+i*0.18+0.05);
+      g.gain.linearRampToValueAtTime(0,t+i*0.18+0.35);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(t+i*0.18);o.stop(t+i*0.18+0.4);
+    });
+    t+=freqs.length*0.18+0.6;
+  }
+}
+
+function stopAlarmAudio(){
+  if(alarmAC){
+    if(alarmAC instanceof Audio)alarmAC.pause();
+    else{try{alarmAC.close();}catch(e){}}
+    alarmAC=null;
+  }
+  document.getElementById('alarmStatus').textContent='';
+}
+
 function init(){
   buildMedGrid();buildBreathTypes();buildSoundGrid();buildSleepStars();buildStarField();buildParticles();buildStreaks();updateGreet();
   document.getElementById('dailyAffirmation').textContent=`"${getDailyAffirmation()}"`;
