@@ -27,7 +27,6 @@
     </div>
     <div class="nav-right">
       <button class="nav-btn" onclick="openSettings()">⚙ Settings</button>
-      <button class="nav-btn" onclick="goSleep()">🌙 Sleep</button>
     </div>
   </nav>
   <div class="content">
@@ -169,14 +168,11 @@
         <div class="sleep-stars" id="sleepStars"></div>
         <h2 class="sleep-title">✦ Sleep Sanctuary</h2>
         <span class="sleep-sub-lbl">Let the night hold you</span>
-        <div class="sleep-grid">
-          <div class="sleep-card" onclick="openMeditation(getMed('Deep Sleep'))"><div class="sleep-card-icon">🌙</div><div class="sleep-card-name">Sleep Meditation</div></div>
-          <div class="sleep-card" onclick="openMeditation(getMed('Sleep Story'))"><div class="sleep-card-icon">⭐</div><div class="sleep-card-name">Sleep Story</div></div>
-          <div class="sleep-card" onclick="openMeditation({name:'Body Scan',emoji:'🌊',cat:'sleep',color:'linear-gradient(135deg,#1A2030,#0A1020)',dur:15,desc:'Release each part of your body'})"><div class="sleep-card-icon">🌊</div><div class="sleep-card-name">Body Scan</div></div>
-          <div class="sleep-card" onclick="showPage('breathe',true)"><div class="sleep-card-icon">🫧</div><div class="sleep-card-name">Sleep Breathing</div></div>
-          <div class="sleep-card" onclick="showPage('sounds',true)"><div class="sleep-card-icon">🎵</div><div class="sleep-card-name">Night Sounds</div></div>
-          <div class="sleep-card" onclick="openMeditation({name:'Gratitude Ritual',emoji:'📿',cat:'healing',color:'linear-gradient(135deg,#1E1228,#0A1520)',dur:10,desc:'Rest in what was good today'})"><div class="sleep-card-icon">📿</div><div class="sleep-card-name">Gratitude Ritual</div></div>
+        <div style="position:relative;z-index:2;display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
+          <button onclick="filterSleepGrid('all',this)" style="background:rgba(237,232,248,0.22);border:1px solid rgba(237,232,248,0.55);border-radius:2rem;padding:.35rem 1rem;font-size:.75rem;color:var(--nt);cursor:pointer;font-family:'DM Sans',sans-serif" class="sleep-filter-btn">All</button>
+          <button onclick="filterSleepGrid('favorites',this)" style="background:rgba(237,232,248,0.08);border:1px solid rgba(237,232,248,0.22);border-radius:2rem;padding:.35rem 1rem;font-size:.75rem;color:rgba(237,232,248,0.62);cursor:pointer;font-family:'DM Sans',sans-serif" class="sleep-filter-btn">💛 Favorites</button>
         </div>
+        <div class="sleep-grid" id="sleepGrid"></div>
         <div class="sleep-timer-area">
           <span class="sleep-timer-sub">Sleep timer</span>
           <div class="sleep-timer-disp" id="sleepTimer">—</div>
