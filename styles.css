@@ -288,3 +288,6 @@ body.night-mode .vol-slider::-webkit-slider-thumb{background:var(--na)!important
 .sound-tile.active .sound-restart{display:inline-block}
 body.night-mode .sound-restart{color:var(--nt2)!important}
 body.night-mode .sound-restart:hover{color:var(--na)!important}
+
+/* sound section headers */
+body.night-mode .sound-section-hdr{color:var(--nt2)!important;border-color:rgba(237,232,248,0.1)!important}
